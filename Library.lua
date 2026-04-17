@@ -664,9 +664,8 @@ function Library:ApplyTextBloom(Label: TextLabel, Active: boolean)
         bloom.FontFace = Label.FontFace
         bloom.TextStrokeTransparency = 0.5
         bloom.TextStrokeColor3 = Library.Scheme.AccentColor
-        Library.Registry[bloom].TextStrokeColor3 = "AccentColor"
-        Library.Registry[bloom].TextColor3 = "AccentColor"
         bloom.TextColor3 = Library.Scheme.AccentColor
+        Library:AddToRegistry(bloom, { TextStrokeColor3 = "AccentColor", TextColor3 = "AccentColor" })
     else
         Label.FontFace = Font.new(Label.FontFace.Family, Enum.FontWeight.Regular, Label.FontFace.Style)
         if bloom then bloom:Destroy() end
@@ -7822,7 +7821,7 @@ function Library:CreateWindow(WindowInfo)
                 }):Play()
                 
                 task.delay(0.15, function()
-                    TweenService:Create(Library.TabIndicator, TweenInfo.new(0.2, Enum.EasingStyle.Snappy, Enum.EasingDirection.Out), {Size = normS}):Play()
+                    TweenService:Create(Library.TabIndicator, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = normS}):Play()
                 end)
             end
 
@@ -8861,7 +8860,10 @@ function Library:CreateWindow(WindowInfo)
     end))
 
     local function bootSeq()
-        for _, btn in pairs(Library.TabButtons) do btn.Button.TextTransparency=1 btn.Button.Position=UDim2.new(0,0,0,20) end
+        for _, btn in pairs(Library.TabButtons) do 
+            if btn.Label then btn.Label.TextTransparency=1 end
+            if btn.Icon then btn.Icon.ImageTransparency=1 end
+        end
         
         local grad = Instance.new("UIGradient")
         grad.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0,1), NumberSequenceKeypoint.new(0.5,0), NumberSequenceKeypoint.new(1,1)})
@@ -8881,7 +8883,8 @@ function Library:CreateWindow(WindowInfo)
 
         task.spawn(function()
             for _, btn in ipairs(Library.TabButtons) do
-                TweenService:Create(btn.Button, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency=0, Position=UDim2.new(0,0,0,0)}):Play()
+                if btn.Label then TweenService:Create(btn.Label, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency=0.5}):Play() end
+                if btn.Icon then TweenService:Create(btn.Icon, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency=0.5}):Play() end
                 task.wait(0.05)
             end
         end)
