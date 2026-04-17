@@ -214,17 +214,17 @@ local Library = {
     OriginalMinSize = Vector2.new(480, 360),
     MinSize = Vector2.new(480, 360),
     DPIScale = 1,
-    CornerRadius = 4,
+    CornerRadius = 10,
     CornerRadiusDropdown = false, -- Temporary
 
     IsLightTheme = false,
     Scheme = {
-        BackgroundColor = Color3.fromRGB(15, 15, 15),
-        MainColor = Color3.fromRGB(25, 25, 25),
+        BackgroundColor = Color3.fromRGB(26, 27, 30),
+        MainColor = Color3.fromRGB(37, 38, 43),
         AccentColor = Color3.fromRGB(125, 85, 255),
-        OutlineColor = Color3.fromRGB(40, 40, 40),
+        OutlineColor = Color3.fromRGB(60, 63, 70),
         FontColor = Color3.new(1, 1, 1),
-        Font = Font.fromEnum(Enum.Font.Code),
+        Font = Font.fromEnum(Enum.Font.BuilderSans),
 
         RedColor = Color3.fromRGB(255, 50, 50),
         DestructiveColor = Color3.fromRGB(220, 38, 38),
@@ -324,7 +324,7 @@ local Templates = {
         Resizable = true,
         SearchbarSize = UDim2.fromScale(1, 1),
         GlobalSearch = false,
-        CornerRadius = 4,
+        CornerRadius = 10,
         NotifySide = "Right",
         ShowCustomCursor = true,
         Font = Enum.Font.Code,
@@ -1621,19 +1621,21 @@ function Library:MakeLine(Frame: GuiObject, Info)
 end
 
 function Library:AddOutline(Frame: GuiObject)
-    local OutlineStroke = New("UIStroke", {
-        Color = "OutlineColor",
-        Thickness = 1,
-        ZIndex = 2,
+    local Shadow = New("ImageLabel", {
+        Name = "FluentShadow",
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://1316045217",
+        ImageColor3 = Color3.new(0, 0, 0),
+        ImageTransparency = 0.45,
+        ScaleType = Enum.ScaleType.Slice,
+        SliceCenter = Rect.new(10, 10, 118, 118),
+        Position = UDim2.new(0, -8, 0, -8),
+        Size = UDim2.new(1, 16, 1, 16),
+        ZIndex = Frame.ZIndex - 1,
         Parent = Frame,
     })
-    local ShadowStroke = New("UIStroke", {
-        Color = "DarkColor",
-        Thickness = 1.5,
-        ZIndex = 1,
-        Parent = Frame,
-    })
-    return OutlineStroke, ShadowStroke
+    
+    return nil, Shadow
 end
 
 function Library:AddBlank(Frame: GuiObject, Size: UDim2)
@@ -3704,6 +3706,7 @@ do
             local Base = New("TextButton", {
                 Active = not Button.Disabled,
                 BackgroundColor3 = Button.Disabled and "BackgroundColor" or "MainColor",
+                BackgroundTransparency = 0.5,
                 Size = UDim2.fromScale(1, 1),
                 Text = Button.Text,
                 TextSize = 14,
@@ -3734,12 +3737,12 @@ do
             
             Button.Base.MouseEnter:Connect(function()
                 if Button.Disabled then return end
-                Button.Tween = TweenService:Create(Button.Base, Library.TweenInfo, { TextTransparency = 0 })
+                Button.Tween = TweenService:Create(Button.Base, Library.TweenInfo, { TextTransparency = 0, BackgroundTransparency = 0 })
                 Button.Tween:Play()
             end)
             Button.Base.MouseLeave:Connect(function()
                 if Button.Disabled then return end
-                Button.Tween = TweenService:Create(Button.Base, Library.TweenInfo, { TextTransparency = 0.4 })
+                Button.Tween = TweenService:Create(Button.Base, Library.TweenInfo, { TextTransparency = 0.4, BackgroundTransparency = 0.5 })
                 Button.Tween:Play()
             end)
 
@@ -4625,6 +4628,11 @@ do
             ZIndex = 2,
             Parent = Bar,
         })
+        New("UIPadding", {
+            PaddingLeft = UDim.new(0, 10),
+            PaddingRight = UDim.new(0, 10),
+            Parent = DisplayLabel,
+        })
         New("UIStroke", {
             ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
             Color = "DarkColor",
@@ -4638,21 +4646,15 @@ do
             Parent = Bar,
         })
 
-        table.insert(
-            Library.Corners,
-            New("UICorner", {
-                CornerRadius = UDim.new(0, Library.CornerRadius / 2),
-                Parent = Bar,
-            })
-        )
+        New("UICorner", {
+            CornerRadius = UDim.new(1, 0),
+            Parent = Bar,
+        })
 
-        table.insert(
-            Library.Corners,
-            New("UICorner", {
-                CornerRadius = UDim.new(0, Library.CornerRadius / 2),
-                Parent = Fill,
-            })
-        )
+        New("UICorner", {
+            CornerRadius = UDim.new(1, 0),
+            Parent = Fill,
+        })
 
         function Slider:UpdateColors()
             if Library.Unloaded then
@@ -6564,15 +6566,11 @@ function Library:CreateWindow(WindowInfo)
             })
         )
         Library:AddOutline(MainFrame)
-        Library:MakeLine(MainFrame, {
-            Position = UDim2.fromOffset(0, 48),
-            Size = UDim2.new(1, 0, 0, 1),
-        })
-
         DividerLine = New("Frame", {
             BackgroundColor3 = "OutlineColor",
             Position = UDim2.fromOffset(InitialLeftWidth, 0),
             Size = UDim2.new(0, 1, 1, -21),
+            Visible = false,
             Parent = MainFrame,
         })
 
@@ -6885,7 +6883,7 @@ function Library:CreateWindow(WindowInfo)
             end,
             Name = "Container",
             Position = UDim2.new(1, 0, 0, 49),
-            Size = UDim2.new(1, -InitialLeftWidth - 1, 1, -70),
+            Size = UDim2.new(1, -InitialLeftWidth, 1, -70),
             Parent = MainFrame,
         })
         New("UIPadding", {
@@ -7794,6 +7792,9 @@ function Library:CreateWindow(WindowInfo)
                 return
             end
 
+            TweenService:Create(TabButton, Library.TweenInfo, {
+                BackgroundTransparency = Hovering and 0.85 or 1,
+            }):Play()
             TweenService:Create(TabLabel, Library.TweenInfo, {
                 TextTransparency = Hovering and 0.25 or 0.5,
             }):Play()
